@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Margem de Lucro — Painel para Lojistas de Marketplace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@500;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B120F; --ink2:#121C18; --surface:#172420; --surface2:#1D2B26;
+    --line: rgba(255,255,255,.09); --line-soft: rgba(255,255,255,.05);
+    --mint:#2FE0A8; --mint-dim:#144538;
+    --laranja:#FF7A1A; --amarelo:#FFD400;
+    --paper:#EFF7F3; --muted:#93A69E; --muted2:#6C7C76;
+    --r-lg:20px; --r-md:14px; --r-sm:9px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--ink); color:var(--paper);
+    font-family:'Inter',system-ui,sans-serif; line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.disp{ font-family:'Hanken Grotesk',sans-serif; font-weight:800; letter-spacing:-.01em; }
+  .mono{ font-family:'JetBrains Mono',monospace; }
+  a{color:inherit}
+  .wrap{max-width:1120px; margin:0 auto; padding:0 40px;}
+  .eyebrow{ font-family:'JetBrains Mono',monospace; font-size:12.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--mint); }
+  ::selection{ background:var(--mint); color:var(--ink); }
+
+  /* ---------- botão CTA ---------- */
+  .btn{
+    display:inline-flex; align-items:center; gap:10px; justify-content:center;
+    background:var(--mint); color:var(--ink); font-weight:700; font-size:16px;
+    padding:16px 30px; border-radius:100px; text-decoration:none;
+    box-shadow:0 0 0 0 rgba(47,224,168,.5); transition:transform .15s, box-shadow .25s;
+  }
+  .btn:hover{ transform:translateY(-2px); box-shadow:0 10px 30px -8px rgba(47,224,168,.55); }
+  .btn .price{ font-family:'JetBrains Mono',monospace; }
+  .btn-ghost{
+    display:inline-flex; align-items:center; color:var(--muted); font-size:13.5px;
+    border-bottom:1px dashed var(--line); padding-bottom:2px; text-decoration:none;
+  }
+
+  /* ---------- header ---------- */
+  header{ padding:26px 0; border-bottom:1px solid var(--line-soft); }
+  header .wrap{ display:flex; align-items:center; justify-content:space-between; }
+  .logo{ display:flex; align-items:center; gap:11px; font-family:'Hanken Grotesk'; font-weight:800; font-size:19px; }
+  .logo .dot{ width:11px; height:11px; border-radius:50%; background:var(--mint); box-shadow:0 0 0 4px var(--mint-dim); }
+  header .btn{ padding:13px 26px; font-size:15.5px; }
+
+  /* ---------- hero ---------- */
+  .hero{ padding:74px 0 60px; position:relative; overflow:hidden; }
+  .hero::before{
+    content:''; position:absolute; top:-200px; right:-160px; width:560px; height:560px;
+    background:radial-gradient(circle, rgba(47,224,168,.16), transparent 70%); pointer-events:none;
+  }
+  .hero-grid{ display:grid; grid-template-columns:1.05fr .95fr; gap:56px; align-items:center; position:relative; }
+  .hero h1{ font-size:52px; line-height:1.04; margin:18px 0 22px; }
+  .hero h1 em{ font-style:normal; color:var(--mint); }
+  .hero p.lead{ font-size:18px; color:var(--muted); max-width:46ch; margin-bottom:32px; }
+  .hero-cta-row{ display:flex; align-items:center; gap:20px; flex-wrap:wrap; margin-bottom:22px; }
+  .trust-row{ display:flex; gap:18px; flex-wrap:wrap; margin-top:26px; }
+  .trust-row span{ display:flex; align-items:center; gap:7px; font-size:13px; color:var(--muted); }
+  .trust-row .ic{ width:16px; height:16px; border-radius:50%; background:var(--surface2); display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--mint); flex:none; }
+
+  /* ---------- assinatura: esteira de pedidos ---------- */
+  .ticker-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg);
+    padding:20px; box-shadow:0 30px 80px -30px rgba(0,0,0,.6); position:relative;
+  }
+  .ticker-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .ticker-head .t{ font-size:12px; color:var(--muted); font-family:'JetBrains Mono',monospace; letter-spacing:.05em; }
+  .ticker-dots{ display:flex; gap:6px; }
+  .ticker-dots i{ width:8px; height:8px; border-radius:50%; }
+  .ticker-viewport{ height:280px; overflow:hidden; border-radius:var(--r-sm); position:relative;
+    mask-image:linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+    -webkit-mask-image:linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent); }
+  .ticker-track{ display:flex; flex-direction:column; animation:tick 14s linear infinite; }
+  .trow{
+    display:grid; grid-template-columns:92px 1fr auto; gap:16px; align-items:center;
+    padding:13px 8px; border-bottom:1px solid var(--line-soft); font-size:12.5px;
+  }
+  .trow .sku{ font-family:'JetBrains Mono',monospace; color:var(--muted); font-size:11.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .trow .prod{ color:var(--paper); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .trow .mg{ font-family:'JetBrains Mono',monospace; text-align:right; font-weight:700; min-width:56px; }
+  .mg.pos{ color:var(--mint); } .mg.neg{ color:#FF6B6B; }
+  @keyframes tick{ from{transform:translateY(0)} to{transform:translateY(-50%)} }
+  .ticker-foot{ display:flex; justify-content:space-between; margin-top:14px; font-size:11.5px; color:var(--muted2); font-family:'JetBrains Mono',monospace; }
+
+  /* ---------- seções genéricas ---------- */
+  section{ padding:76px 0; border-top:1px solid var(--line-soft); }
+  .sec-head{ max-width:640px; margin:0 auto 44px; text-align:center; }
+  .sec-head h2{ font-size:34px; margin-top:12px; }
+  .sec-head p{ color:var(--muted); font-size:16.5px; margin-top:14px; }
+
+  /* problema */
+  .problema{ display:grid; grid-template-columns:1fr 1fr; gap:50px; align-items:start; }
+  .problema .fake-stat{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md); padding:26px; }
+  .fake-stat .big{ font-family:'JetBrains Mono',monospace; font-size:38px; font-weight:700; color:#FF6B6B; }
+  .fake-stat .lbl{ color:var(--muted); font-size:13px; margin-top:6px; }
+  .problema ul{ list-style:none; }
+  .problema li{ display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--line-soft); color:var(--muted); font-size:15px; }
+  .problema li b{ color:var(--paper); flex:none; min-width:150px; }
+
+  /* como funciona */
+  .steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:26px; }
+  .step{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md); padding:26px; position:relative; transition:transform .18s, border-color .18s; }
+  .step:hover{ transform:translateY(-3px); border-color:rgba(47,224,168,.35); }
+  .step .n{ font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--mint); }
+  .step h3{ font-size:19px; margin:14px 0 10px; }
+  .step p{ color:var(--muted); font-size:14.5px; }
+
+  /* recursos grid */
+  .feat-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+  .feat{ padding:24px; border:1px solid var(--line-soft); border-radius:var(--r-md); transition:transform .18s, border-color .18s, background .18s; }
+  .feat:hover{ transform:translateY(-3px); border-color:rgba(47,224,168,.3); background:var(--surface); }
+  .feat .ic{ width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:16px; margin-bottom:14px; }
+  .feat h3{ font-size:16.5px; margin-bottom:8px; font-family:'Hanken Grotesk'; font-weight:700; }
+  .feat p{ color:var(--muted); font-size:14px; }
+
+  /* privacidade destaque */
+  .privacidade{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:52px; display:grid; grid-template-columns:auto 1fr; gap:36px; align-items:center; }
+  .priv-badge{ width:88px; height:88px; border-radius:50%; background:var(--mint-dim); border:1.5px solid var(--mint); display:flex; align-items:center; justify-content:center; font-size:34px; flex:none; }
+  .privacidade h2{ font-size:28px; margin-bottom:12px; }
+  .privacidade p{ color:var(--muted); font-size:15.5px; max-width:60ch; }
+  .privacidade p b{ color:var(--paper); }
+
+  /* preço */
+  .price-card{ background:linear-gradient(180deg, var(--surface2), var(--surface)); border:1px solid var(--line); border-radius:var(--r-lg); padding:48px; text-align:center; max-width:480px; margin:0 auto; }
+  .price-card .old{ text-decoration:line-through; color:var(--muted2); font-family:'JetBrains Mono',monospace; font-size:15px; }
+  .price-card .now{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:56px; color:var(--mint); margin:6px 0 4px; }
+  .price-card .now sup{ font-size:22px; top:-22px; }
+  .price-card .sub{ color:var(--muted); font-size:13.5px; margin-bottom:28px; }
+  .price-list{ list-style:none; text-align:left; margin:0 auto 30px; max-width:320px; }
+  .price-list li{ display:flex; gap:10px; padding:8px 0; font-size:14.5px; color:var(--muted); }
+  .price-list li b{ color:var(--mint); }
+  .badges-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:30px; }
+  .badge{ border:1px solid var(--line); border-radius:12px; padding:14px 8px; text-align:center; }
+  .badge .ic{ color:var(--mint); font-size:16px; }
+  .badge .t{ font-size:12px; font-weight:700; margin-top:6px; }
+  .badge .s{ font-size:10.5px; color:var(--muted2); margin-top:2px; }
+
+  /* faq teaser */
+  .faq-mini{ display:grid; gap:14px; max-width:760px; margin:0 auto; }
+  details{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-sm); padding:18px 20px; }
+  summary{ cursor:pointer; font-weight:600; font-size:15px; list-style:none; }
+  summary::-webkit-details-marker{ display:none; }
+  details p{ color:var(--muted); font-size:14px; margin-top:10px; }
+
+  /* CTA final */
+  .cta-final{ text-align:center; padding:90px 0 100px; }
+  .cta-final h2{ font-size:38px; max-width:20ch; margin:0 auto 18px; }
+  .cta-final p{ color:var(--muted); margin-bottom:32px; }
+
+  footer{ border-top:1px solid var(--line-soft); padding:30px 0; text-align:center; color:var(--muted2); font-size:12.5px; }
+
+  @media(max-width:860px){
+    .hero-grid{ grid-template-columns:1fr; }
+    .hero h1{ font-size:36px; }
+    .problema{ grid-template-columns:1fr; }
+    .problema li{ flex-direction:column; gap:4px; }
+    .problema li b{ min-width:0; }
+    .steps, .feat-grid{ grid-template-columns:1fr; }
+    .privacidade{ grid-template-columns:1fr; text-align:center; padding:32px; }
+    .privacidade .priv-badge{ margin:0 auto; }
+    .badges-row{ grid-template-columns:1fr; }
+    section{ padding:56px 0; }
+    .price-card{ padding:32px 22px; }
+    .wrap{ padding:0 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="logo"><span class="dot"></span> Margem de Lucro</div>
+    <a class="btn" href="https://pay.kiwify.com.br/L17nmjF">Comprar · <span class="price mono">R$43</span></a>
+  </div>
+</header>
+
+<section class="hero" style="border-top:none">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">PARA LOJISTAS DE MARKETPLACE</span>
+      <h1>Você sabe quanto <em>sobra</em> depois das taxas?</h1>
+      <p class="lead">Solte o relatório de pedidos, cadastre o custo dos seus produtos, e veja sua margem real — por produto e por pedido, na hora. Sem planilha manual, sem adivinhação.</p>
+      <div class="hero-cta-row">
+        <a class="btn" href="https://pay.kiwify.com.br/L17nmjF">Quero ver minha margem real</a>
+        <a class="btn-ghost" href="#como-funciona">Ver como funciona ↓</a>
+      </div>
+      <div class="trust-row">
+        <span><span class="ic">✓</span> Pagamento único</span>
+        <span><span class="ic">✓</span> Garantia de 7 dias</span>
+        <span><span class="ic">✓</span> 100% local e privado</span>
+      </div>
+    </div>
+
+    <div class="ticker-card">
+      <div class="ticker-head">
+        <span class="t">VENDAS_POR_PEDIDO.LIVE</span>
+        <div class="ticker-dots"><i style="background:#FF6B6B"></i><i style="background:var(--amarelo)"></i><i style="background:var(--mint)"></i></div>
+      </div>
+      <div class="ticker-viewport">
+        <div class="ticker-track" id="track"></div>
+      </div>
+      <div class="ticker-foot"><span>ATUALIZAÇÃO EM TEMPO REAL</span><span>MARGEM %</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">O PROBLEMA</span>
+      <h2>Faturamento alto não é a mesma coisa que lucro.</h2>
+    </div>
+    <div class="problema">
+      <ul>
+        <li><b>Comissão + taxas</b> cada venda perde uma fatia antes de chegar em você.</li>
+        <li><b>Custo do produto</b> raramente é revisado depois que o anúncio já está no ar.</li>
+        <li><b>O resultado:</b> você só descobre o prejuízo depois de vender centenas de unidades.</li>
+      </ul>
+      <div class="fake-stat">
+        <div class="big mono">-12,4%</div>
+        <div class="lbl">margem real de um produto que "vendia bem" — descoberta só depois de cruzar taxas + custo real, num caso comum entre lojistas.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="como-funciona">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">COMO FUNCIONA</span>
+      <h2>Três passos, nenhuma instalação.</h2>
+    </div>
+    <div class="steps">
+      <div class="step"><span class="n">01</span><h3>Exporte o relatório</h3><p>Baixe o relatório de pedidos direto do painel de vendas que você já usa — em Excel, poucos minutos.</p></div>
+      <div class="step"><span class="n">02</span><h3>Cadastre os custos</h3><p>Uma vez só: digite manualmente ou importe uma planilha inteira de produtos de uma vez.</p></div>
+      <div class="step"><span class="n">03</span><h3>Veja a margem real</h3><p>Solte o arquivo no painel. Vendas, taxas, custo e lucro — por produto e por pedido, na hora.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">O QUE VOCÊ RECEBE</span>
+      <h2>Um painel completo, não uma calculadora solta.</h2>
+    </div>
+    <div class="feat-grid">
+      <div class="feat"><div class="ic" style="background:var(--mint-dim); color:var(--mint)">📊</div><h3>Painel de margem completo</h3><p>Vendas, taxas, custo, lucro e margem — por SKU e por pedido, com resumo por mês e por dia.</p></div>
+      <div class="feat"><div class="ic" style="background:rgba(255,122,26,.15); color:var(--laranja)">🏆</div><h3>Escada de margem por produto</h3><p>Veja em segundos quais produtos estão dando lucro e quais estão sangrando sua margem.</p></div>
+      <div class="feat"><div class="ic" style="background:rgba(255,212,0,.15); color:var(--amarelo)">🧩</div><h3>Suporte a combos</h3><p>Produtos vendidos junto (2 itens diferentes) calculam o custo certo automaticamente.</p></div>
+      <div class="feat"><div class="ic" style="background:var(--mint-dim); color:var(--mint)">📥</div><h3>Importação em massa</h3><p>Suba uma planilha inteira de custos de uma vez, ou deixe o painel puxar os SKUs dos pedidos.</p></div>
+      <div class="feat"><div class="ic" style="background:rgba(255,122,26,.15); color:var(--laranja)">📄</div><h3>Exporta Excel e PDF</h3><p>Leve os números pra reunião, pro contador, ou guarde de backup, com um clique.</p></div>
+      <div class="feat"><div class="ic" style="background:rgba(255,212,0,.15); color:var(--amarelo)">📖</div><h3>Guia completo incluso</h3><p>Explicação de cada tela e um FAQ com passo a passo — sem depender de suporte pra começar.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="privacidade">
+      <div class="priv-badge">🔒</div>
+      <div>
+        <h2>Seus dados de vendas não são o produto.</h2>
+        <p>O cálculo roda <b>inteiro no seu navegador</b>. Nada do que você solta no painel — pedidos ou custos — é enviado pra nenhum servidor, nem nosso, nem de terceiros. Diferente da maioria das ferramentas do mercado, você não precisa criar conta nem expor seu faturamento pra ninguém.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="preco">
+  <div class="wrap">
+    <div class="sec-head" style="text-align:center; margin:0 auto 44px;">
+      <span class="eyebrow">ACESSO</span>
+      <h2>Um pagamento. Uso pra sempre.</h2>
+    </div>
+    <div class="price-card">
+      <div class="now"><sup>R$</sup>43</div>
+      <div class="sub">pagamento único · sem mensalidade</div>
+      <ul class="price-list">
+        <li><b>✓</b> Acesso vitalício ao painel</li>
+        <li><b>✓</b> Todas as atualizações futuras incluídas</li>
+        <li><b>✓</b> Guia completo + FAQ</li>
+        <li><b>✓</b> Funciona em qualquer computador</li>
+      </ul>
+      <a class="btn" style="width:100%" href="https://pay.kiwify.com.br/L17nmjF">Comprar agora</a>
+      <div class="badges-row">
+        <div class="badge"><div class="ic">✓</div><div class="t">Garantia de 7 dias</div><div class="s">Experimente sem risco</div></div>
+        <div class="badge"><div class="ic">🛡</div><div class="t">Compra segura</div><div class="s">Processado pela Kiwify</div></div>
+        <div class="badge"><div class="ic">♥</div><div class="t">Pagamento único</div><div class="s">Sem mensalidade</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">DÚVIDAS RÁPIDAS</span>
+      <h2>Antes de comprar</h2>
+    </div>
+    <div class="faq-mini">
+      <details open><summary>Preciso instalar alguma coisa?</summary><p>Não. O painel abre direto no navegador — funciona em qualquer computador, sem instalar nenhum programa.</p></details>
+      <details><summary>Meus dados de vendas ficam salvos em algum lugar?</summary><p>Não. Todo o cálculo é feito localmente, no seu navegador. Nada é enviado pra nenhum servidor.</p></details>
+      <details><summary>Funciona pra qualquer marketplace?</summary><p>O painel reconhece automaticamente os formatos de relatório de pedidos dos principais marketplaces do Brasil.</p></details>
+      <details><summary>E se eu não gostar?</summary><p>Você tem 7 dias de garantia — se não fizer sentido pra você, é só pedir reembolso.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="cta-final" style="border-bottom:none">
+  <div class="wrap">
+    <h2>Pare de vender no escuro.</h2>
+    <p>Descubra sua margem real hoje — pagamento único, R$43.</p>
+    <a class="btn" href="https://pay.kiwify.com.br/L17nmjF">Comprar agora</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">Margem de Lucro · Ferramenta independente, compatível com os principais marketplaces do Brasil. Sem afiliação com nenhuma plataforma.</div>
+</footer>
+
+<script>
+  const rows = [
+    {sku:'SKU-1042', prod:'Luminária de mesa LED', mg:34.6, pos:true},
+    {sku:'SKU-2210', prod:'Suporte de celular',     mg:19.8, pos:true},
+    {sku:'SKU-0087', prod:'Organizador de gaveta',  mg:-7.4, pos:false},
+    {sku:'SKU-3355', prod:'Fone bluetooth',         mg:42.1, pos:true},
+    {sku:'SKU-1188', prod:'Escova secadora',        mg:12.3, pos:true},
+    {sku:'SKU-4021', prod:'Capa protetora',         mg:-2.9, pos:false},
+    {sku:'SKU-0966', prod:'Kit organizador',        mg:27.5, pos:true},
+    {sku:'SKU-2740', prod:'Mini ventilador USB',    mg:16.0, pos:true},
+  ];
+  const fmt = r => `<div class="trow"><span class="sku">${r.sku}</span><span class="prod">${r.prod}</span><span class="mg ${r.pos?'pos':'neg'}">${r.pos?'+':''}${r.mg.toFixed(1)}%</span></div>`;
+  document.getElementById('track').innerHTML = rows.map(fmt).join('') + rows.map(fmt).join('');
+</script>
+
+</body>
+</html>
