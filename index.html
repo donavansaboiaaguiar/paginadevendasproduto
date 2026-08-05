@@ -3,23 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Margem de Lucro — Painel para Lojistas de Marketplace</title>
+<title>Lucro Real — Painel de Margem e Calculadora de Preço</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@500;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#0B120F; --ink2:#121C18; --surface:#172420; --surface2:#1D2B26;
-    --line: rgba(255,255,255,.09); --line-soft: rgba(255,255,255,.05);
-    --mint:#2FE0A8; --mint-dim:#144538;
-    --laranja:#FF7A1A; --amarelo:#FFD400;
-    --paper:#EFF7F3; --muted:#93A69E; --muted2:#6C7C76;
-    --r-lg:20px; --r-md:14px; --r-sm:9px;
+    --bg:#EAEEEC; --surface:#FFFFFF; --surface2:#F4F7F5;
+    --ink:#14201E; --muted:#5C6B68; --muted2:#8B978F;
+    --line:#D7DEDB; --line-soft:#E8ECEA;
+    --pos:#0F6E5C; --pos-dim:#E2F1ED;
+    --neg:#C0392B; --neg-dim:#F8E7E4;
+    --r-lg:18px; --r-md:12px; --r-sm:9px;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html{scroll-behavior:smooth}
   body{
-    background:var(--ink); color:var(--paper);
+    background:var(--bg); color:var(--ink);
     font-family:'Inter',system-ui,sans-serif; line-height:1.55;
     -webkit-font-smoothing:antialiased;
   }
@@ -27,17 +27,17 @@
   .mono{ font-family:'JetBrains Mono',monospace; }
   a{color:inherit}
   .wrap{max-width:1120px; margin:0 auto; padding:0 40px;}
-  .eyebrow{ font-family:'JetBrains Mono',monospace; font-size:12.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--mint); }
-  ::selection{ background:var(--mint); color:var(--ink); }
+  .eyebrow{ font-family:'JetBrains Mono',monospace; font-size:12.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--pos); }
+  ::selection{ background:var(--pos); color:#fff; }
 
   /* ---------- botão CTA ---------- */
   .btn{
     display:inline-flex; align-items:center; gap:10px; justify-content:center;
-    background:var(--mint); color:var(--ink); font-weight:700; font-size:16px;
+    background:var(--pos); color:#fff; font-weight:700; font-size:16px;
     padding:16px 30px; border-radius:100px; text-decoration:none;
-    box-shadow:0 0 0 0 rgba(47,224,168,.5); transition:transform .15s, box-shadow .25s;
+    transition:transform .15s, box-shadow .2s, background .15s;
   }
-  .btn:hover{ transform:translateY(-2px); box-shadow:0 10px 30px -8px rgba(47,224,168,.55); }
+  .btn:hover{ background:#0c5a4b; transform:translateY(-1px); box-shadow:0 10px 24px -10px rgba(15,110,92,.4); }
   .btn .price{ font-family:'JetBrains Mono',monospace; }
   .btn-ghost{
     display:inline-flex; align-items:center; color:var(--muted); font-size:13.5px;
@@ -45,130 +45,142 @@
   }
 
   /* ---------- header ---------- */
-  header{ padding:26px 0; border-bottom:1px solid var(--line-soft); }
+  header{ padding:24px 0; border-bottom:1px solid var(--line); }
   header .wrap{ display:flex; align-items:center; justify-content:space-between; }
   .logo{ display:flex; align-items:center; gap:11px; font-family:'Hanken Grotesk'; font-weight:800; font-size:19px; }
-  .logo .dot{ width:11px; height:11px; border-radius:50%; background:var(--mint); box-shadow:0 0 0 4px var(--mint-dim); }
-  header .btn{ padding:13px 26px; font-size:15.5px; }
+  .logo .dot{ width:11px; height:11px; border-radius:50%; background:var(--pos); }
+  header .btn{ padding:12px 24px; font-size:14.5px; }
 
   /* ---------- hero ---------- */
-  .hero{ padding:74px 0 60px; position:relative; overflow:hidden; }
-  .hero::before{
-    content:''; position:absolute; top:-200px; right:-160px; width:560px; height:560px;
-    background:radial-gradient(circle, rgba(47,224,168,.16), transparent 70%); pointer-events:none;
-  }
-  .hero-grid{ display:grid; grid-template-columns:1.05fr .95fr; gap:56px; align-items:center; position:relative; }
-  .hero h1{ font-size:52px; line-height:1.04; margin:18px 0 22px; }
-  .hero h1 em{ font-style:normal; color:var(--mint); }
-  .hero p.lead{ font-size:18px; color:var(--muted); max-width:46ch; margin-bottom:32px; }
+  .hero{ padding:64px 0 56px; border-top:none; }
+  .hero-grid{ display:grid; grid-template-columns:1.05fr .95fr; gap:56px; align-items:center; }
+  .hero h1{ font-size:44px; line-height:1.1; margin:16px 0 20px; color:var(--ink); }
+  .hero h1 em{ font-style:normal; color:var(--pos); }
+  .hero p.lead{ font-size:17px; color:var(--muted); max-width:48ch; margin-bottom:30px; }
   .hero-cta-row{ display:flex; align-items:center; gap:20px; flex-wrap:wrap; margin-bottom:22px; }
-  .trust-row{ display:flex; gap:18px; flex-wrap:wrap; margin-top:26px; }
+  .trust-row{ display:flex; gap:18px; flex-wrap:wrap; margin-top:24px; }
   .trust-row span{ display:flex; align-items:center; gap:7px; font-size:13px; color:var(--muted); }
-  .trust-row .ic{ width:16px; height:16px; border-radius:50%; background:var(--surface2); display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--mint); flex:none; }
+  .trust-row .ic{ width:16px; height:16px; border-radius:50%; background:var(--pos-dim); display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--pos); flex:none; }
 
-  /* ---------- assinatura: esteira de pedidos ---------- */
-  .ticker-card{
+  /* ---------- mockup: calculadora (hero) ---------- */
+  .calc-card{
     background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg);
-    padding:20px; box-shadow:0 30px 80px -30px rgba(0,0,0,.6); position:relative;
+    padding:24px; box-shadow:0 16px 40px -24px rgba(20,32,30,.25);
   }
-  .ticker-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
-  .ticker-head .t{ font-size:12px; color:var(--muted); font-family:'JetBrains Mono',monospace; letter-spacing:.05em; }
-  .ticker-dots{ display:flex; gap:6px; }
-  .ticker-dots i{ width:8px; height:8px; border-radius:50%; }
-  .ticker-viewport{ height:280px; overflow:hidden; border-radius:var(--r-sm); position:relative;
-    mask-image:linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
-    -webkit-mask-image:linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent); }
-  .ticker-track{ display:flex; flex-direction:column; animation:tick 14s linear infinite; }
-  .trow{
-    display:grid; grid-template-columns:92px 1fr auto; gap:16px; align-items:center;
-    padding:13px 8px; border-bottom:1px solid var(--line-soft); font-size:12.5px;
-  }
-  .trow .sku{ font-family:'JetBrains Mono',monospace; color:var(--muted); font-size:11.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .trow .prod{ color:var(--paper); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .trow .mg{ font-family:'JetBrains Mono',monospace; text-align:right; font-weight:700; min-width:56px; }
-  .mg.pos{ color:var(--mint); } .mg.neg{ color:#FF6B6B; }
-  @keyframes tick{ from{transform:translateY(0)} to{transform:translateY(-50%)} }
-  .ticker-foot{ display:flex; justify-content:space-between; margin-top:14px; font-size:11.5px; color:var(--muted2); font-family:'JetBrains Mono',monospace; }
+  .calc-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+  .calc-head .t{ font-size:11.5px; color:var(--muted); font-family:'JetBrains Mono',monospace; letter-spacing:.08em; text-transform:uppercase; }
+  .calc-row{ display:flex; justify-content:space-between; align-items:center; padding:11px 0; border-bottom:1px solid var(--line-soft); font-size:14px; }
+  .calc-row .k{ color:var(--muted); }
+  .calc-row .v{ font-family:'JetBrains Mono',monospace; font-weight:700; }
+  .calc-bar{ height:6px; background:var(--line-soft); border-radius:4px; margin:14px 0; position:relative; overflow:hidden; }
+  .calc-bar i{ position:absolute; left:0; top:0; bottom:0; width:42%; background:var(--pos); border-radius:4px; }
+  .calc-result{ margin-top:16px; padding:16px; background:var(--pos-dim); border-radius:var(--r-md); text-align:center; }
+  .calc-result .lbl{ font-size:11px; color:var(--pos); font-family:'JetBrains Mono',monospace; letter-spacing:.05em; text-transform:uppercase; }
+  .calc-result .val{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:30px; color:var(--pos); margin-top:4px; }
+  .calc-result .sub{ font-size:12.5px; color:var(--muted); margin-top:4px; }
 
   /* ---------- seções genéricas ---------- */
-  section{ padding:76px 0; border-top:1px solid var(--line-soft); }
+  section{ padding:72px 0; border-top:1px solid var(--line); }
   .sec-head{ max-width:640px; margin:0 auto 44px; text-align:center; }
-  .sec-head h2{ font-size:34px; margin-top:12px; }
-  .sec-head p{ color:var(--muted); font-size:16.5px; margin-top:14px; }
+  .sec-head h2{ font-size:32px; margin-top:12px; }
+  .sec-head p{ color:var(--muted); font-size:16px; margin-top:14px; }
 
   /* problema */
   .problema{ display:grid; grid-template-columns:1fr 1fr; gap:50px; align-items:start; }
   .problema .fake-stat{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md); padding:26px; }
-  .fake-stat .big{ font-family:'JetBrains Mono',monospace; font-size:38px; font-weight:700; color:#FF6B6B; }
+  .fake-stat .big{ font-family:'JetBrains Mono',monospace; font-size:38px; font-weight:700; color:var(--neg); }
   .fake-stat .lbl{ color:var(--muted); font-size:13px; margin-top:6px; }
   .problema ul{ list-style:none; }
-  .problema li{ display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--line-soft); color:var(--muted); font-size:15px; }
-  .problema li b{ color:var(--paper); flex:none; min-width:150px; }
+  .problema li{ display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); color:var(--muted); font-size:15px; }
+  .problema li b{ color:var(--ink); flex:none; min-width:150px; }
 
   /* como funciona */
-  .steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:26px; }
-  .step{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md); padding:26px; position:relative; transition:transform .18s, border-color .18s; }
-  .step:hover{ transform:translateY(-3px); border-color:rgba(47,224,168,.35); }
-  .step .n{ font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--mint); }
-  .step h3{ font-size:19px; margin:14px 0 10px; }
+  .steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+  .step{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md); padding:24px; }
+  .step .n{ font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--pos); }
+  .step h3{ font-size:18px; margin:14px 0 10px; }
   .step p{ color:var(--muted); font-size:14.5px; }
 
+  /* duas ferramentas */
+  .duas{ display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:stretch; }
+  .duas-card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:30px; display:flex; flex-direction:column; }
+  .duas-card .tag{ display:inline-flex; align-items:center; gap:7px; font-size:11.5px; font-family:'JetBrains Mono',monospace; letter-spacing:.06em; text-transform:uppercase; color:var(--pos); background:var(--pos-dim); padding:5px 11px; border-radius:20px; width:fit-content; margin-bottom:16px; }
+  .duas-card h3{ font-size:20px; margin-bottom:10px; }
+  .duas-card p{ color:var(--muted); font-size:14.5px; margin-bottom:18px; }
+  .duas-card ul{ list-style:none; margin-top:auto; }
+  .duas-card li{ display:flex; gap:9px; padding:6px 0; font-size:13.5px; color:var(--muted); }
+  .duas-card li b{ color:var(--pos); }
+
+  /* ticker (esteira de pedidos) */
+  .ticker-card{ background:var(--surface2); border:1px solid var(--line-soft); border-radius:var(--r-md); padding:16px; margin-top:16px; }
+  .ticker-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+  .ticker-head .t{ font-size:11px; color:var(--muted); font-family:'JetBrains Mono',monospace; letter-spacing:.04em; }
+  .ticker-viewport{ height:150px; overflow:hidden; border-radius:var(--r-sm); position:relative;
+    mask-image:linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+    -webkit-mask-image:linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent); }
+  .ticker-track{ display:flex; flex-direction:column; animation:tick 14s linear infinite; }
+  .trow{ display:grid; grid-template-columns:80px 1fr auto; gap:12px; align-items:center; padding:9px 4px; border-bottom:1px solid var(--line-soft); font-size:12px; }
+  .trow .sku{ font-family:'JetBrains Mono',monospace; color:var(--muted); font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .trow .prod{ color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .trow .mg{ font-family:'JetBrains Mono',monospace; text-align:right; font-weight:700; min-width:52px; }
+  .mg.pos{ color:var(--pos); } .mg.neg{ color:var(--neg); }
+  @keyframes tick{ from{transform:translateY(0)} to{transform:translateY(-50%)} }
+
   /* recursos grid */
-  .feat-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
-  .feat{ padding:24px; border:1px solid var(--line-soft); border-radius:var(--r-md); transition:transform .18s, border-color .18s, background .18s; }
-  .feat:hover{ transform:translateY(-3px); border-color:rgba(47,224,168,.3); background:var(--surface); }
-  .feat .ic{ width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:16px; margin-bottom:14px; }
-  .feat h3{ font-size:16.5px; margin-bottom:8px; font-family:'Hanken Grotesk'; font-weight:700; }
-  .feat p{ color:var(--muted); font-size:14px; }
+  .feat-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:var(--r-md); overflow:hidden; }
+  .feat{ padding:26px; background:var(--surface); transition:background .18s; }
+  .feat:hover{ background:var(--surface2); }
+  .feat .ic{ width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:16px; margin-bottom:14px; background:var(--pos-dim); color:var(--pos); }
+  .feat h3{ font-size:16px; margin-bottom:8px; font-family:'Hanken Grotesk'; font-weight:700; }
+  .feat p{ color:var(--muted); font-size:13.5px; }
 
   /* privacidade destaque */
-  .privacidade{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:52px; display:grid; grid-template-columns:auto 1fr; gap:36px; align-items:center; }
-  .priv-badge{ width:88px; height:88px; border-radius:50%; background:var(--mint-dim); border:1.5px solid var(--mint); display:flex; align-items:center; justify-content:center; font-size:34px; flex:none; }
-  .privacidade h2{ font-size:28px; margin-bottom:12px; }
-  .privacidade p{ color:var(--muted); font-size:15.5px; max-width:60ch; }
-  .privacidade p b{ color:var(--paper); }
+  .privacidade{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:48px; display:grid; grid-template-columns:auto 1fr; gap:32px; align-items:center; }
+  .priv-badge{ width:80px; height:80px; border-radius:50%; background:var(--pos-dim); display:flex; align-items:center; justify-content:center; font-size:30px; flex:none; }
+  .privacidade h2{ font-size:26px; margin-bottom:12px; }
+  .privacidade p{ color:var(--muted); font-size:15px; max-width:60ch; }
+  .privacidade p b{ color:var(--ink); }
 
   /* preço */
-  .price-card{ background:linear-gradient(180deg, var(--surface2), var(--surface)); border:1px solid var(--line); border-radius:var(--r-lg); padding:48px; text-align:center; max-width:480px; margin:0 auto; }
-  .price-card .old{ text-decoration:line-through; color:var(--muted2); font-family:'JetBrains Mono',monospace; font-size:15px; }
-  .price-card .now{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:56px; color:var(--mint); margin:6px 0 4px; }
-  .price-card .now sup{ font-size:22px; top:-22px; }
-  .price-card .sub{ color:var(--muted); font-size:13.5px; margin-bottom:28px; }
-  .price-list{ list-style:none; text-align:left; margin:0 auto 30px; max-width:320px; }
-  .price-list li{ display:flex; gap:10px; padding:8px 0; font-size:14.5px; color:var(--muted); }
-  .price-list li b{ color:var(--mint); }
-  .badges-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:30px; }
+  .price-card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:44px; text-align:center; max-width:460px; margin:0 auto; }
+  .price-card .now{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:52px; color:var(--pos); margin:6px 0 4px; }
+  .price-card .now sup{ font-size:20px; top:-20px; }
+  .price-card .sub{ color:var(--muted); font-size:13.5px; margin-bottom:26px; }
+  .price-list{ list-style:none; text-align:left; margin:0 auto 28px; max-width:320px; }
+  .price-list li{ display:flex; gap:10px; padding:8px 0; font-size:14px; color:var(--muted); }
+  .price-list li b{ color:var(--pos); }
+  .badges-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:28px; }
   .badge{ border:1px solid var(--line); border-radius:12px; padding:14px 8px; text-align:center; }
-  .badge .ic{ color:var(--mint); font-size:16px; }
-  .badge .t{ font-size:12px; font-weight:700; margin-top:6px; }
+  .badge .ic{ color:var(--pos); font-size:16px; }
+  .badge .t{ font-size:11.5px; font-weight:700; margin-top:6px; }
   .badge .s{ font-size:10.5px; color:var(--muted2); margin-top:2px; }
 
   /* faq teaser */
-  .faq-mini{ display:grid; gap:14px; max-width:760px; margin:0 auto; }
+  .faq-mini{ display:grid; gap:12px; max-width:760px; margin:0 auto; }
   details{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-sm); padding:18px 20px; }
   summary{ cursor:pointer; font-weight:600; font-size:15px; list-style:none; }
   summary::-webkit-details-marker{ display:none; }
   details p{ color:var(--muted); font-size:14px; margin-top:10px; }
 
   /* CTA final */
-  .cta-final{ text-align:center; padding:90px 0 100px; }
-  .cta-final h2{ font-size:38px; max-width:20ch; margin:0 auto 18px; }
-  .cta-final p{ color:var(--muted); margin-bottom:32px; }
+  .cta-final{ text-align:center; padding:84px 0 96px; }
+  .cta-final h2{ font-size:34px; max-width:20ch; margin:0 auto 18px; }
+  .cta-final p{ color:var(--muted); margin-bottom:30px; }
 
-  footer{ border-top:1px solid var(--line-soft); padding:30px 0; text-align:center; color:var(--muted2); font-size:12.5px; }
+  footer{ border-top:1px solid var(--line); padding:28px 0; text-align:center; color:var(--muted2); font-size:12.5px; }
 
   @media(max-width:860px){
     .hero-grid{ grid-template-columns:1fr; }
-    .hero h1{ font-size:36px; }
+    .hero h1{ font-size:34px; }
     .problema{ grid-template-columns:1fr; }
     .problema li{ flex-direction:column; gap:4px; }
     .problema li b{ min-width:0; }
-    .steps, .feat-grid{ grid-template-columns:1fr; }
-    .privacidade{ grid-template-columns:1fr; text-align:center; padding:32px; }
+    .steps, .feat-grid, .duas{ grid-template-columns:1fr; }
+    .privacidade{ grid-template-columns:1fr; text-align:center; padding:30px; }
     .privacidade .priv-badge{ margin:0 auto; }
     .badges-row{ grid-template-columns:1fr; }
-    section{ padding:56px 0; }
-    .price-card{ padding:32px 22px; }
+    section{ padding:52px 0; }
+    .price-card{ padding:30px 20px; }
     .wrap{ padding:0 20px; }
   }
 </style>
@@ -177,7 +189,7 @@
 
 <header>
   <div class="wrap">
-    <div class="logo"><span class="dot"></span> Margem de Lucro</div>
+    <div class="logo"><span class="dot"></span> Lucro Real</div>
     <a class="btn" href="https://pay.kiwify.com.br/L17nmjF">Comprar · <span class="price mono">R$43</span></a>
   </div>
 </header>
@@ -186,10 +198,10 @@
   <div class="wrap hero-grid">
     <div>
       <span class="eyebrow">PARA LOJISTAS DE MARKETPLACE</span>
-      <h1>Você sabe quanto <em>sobra</em> depois das taxas?</h1>
-      <p class="lead">Solte o relatório de pedidos, cadastre o custo dos seus produtos, e veja sua margem real — por produto e por pedido, na hora. Sem planilha manual, sem adivinhação.</p>
+      <h1>Antes de vender, descubra o <em>preço certo</em>.</h1>
+      <p class="lead">Calcule o preço mínimo de venda de um produto novo em segundos — e, depois de vender, acompanhe sua margem real por produto e por pedido. As duas coisas, no mesmo painel, sem instalar nada.</p>
       <div class="hero-cta-row">
-        <a class="btn" href="https://pay.kiwify.com.br/L17nmjF">Quero ver minha margem real</a>
+        <a class="btn" href="https://pay.kiwify.com.br/L17nmjF">Quero calcular meu preço</a>
         <a class="btn-ghost" href="#como-funciona">Ver como funciona ↓</a>
       </div>
       <div class="trust-row">
@@ -199,15 +211,19 @@
       </div>
     </div>
 
-    <div class="ticker-card">
-      <div class="ticker-head">
-        <span class="t">VENDAS_POR_PEDIDO.LIVE</span>
-        <div class="ticker-dots"><i style="background:#FF6B6B"></i><i style="background:var(--amarelo)"></i><i style="background:var(--mint)"></i></div>
+    <div class="calc-card">
+      <div class="calc-head">
+        <span class="t">Calculadora de preço</span>
       </div>
-      <div class="ticker-viewport">
-        <div class="ticker-track" id="track"></div>
+      <div class="calc-row"><span class="k">Custo do produto</span><span class="v">R$ 30,00</span></div>
+      <div class="calc-row"><span class="k">Marketplace</span><span class="v">Shopee</span></div>
+      <div class="calc-row" style="border-bottom:none"><span class="k">Margem desejada</span><span class="v">25%</span></div>
+      <div class="calc-bar"><i></i></div>
+      <div class="calc-result">
+        <div class="lbl">Preço de venda sugerido</div>
+        <div class="val">R$ 61,82</div>
+        <div class="sub">Lucro líquido de R$ 15,45 por venda</div>
       </div>
-      <div class="ticker-foot"><span>ATUALIZAÇÃO EM TEMPO REAL</span><span>MARGEM %</span></div>
     </div>
   </div>
 </section>
@@ -220,8 +236,8 @@
     </div>
     <div class="problema">
       <ul>
+        <li><b>Preço no chute</b> sem saber a comissão certa, você já anuncia perdendo dinheiro.</li>
         <li><b>Comissão + taxas</b> cada venda perde uma fatia antes de chegar em você.</li>
-        <li><b>Custo do produto</b> raramente é revisado depois que o anúncio já está no ar.</li>
         <li><b>O resultado:</b> você só descobre o prejuízo depois de vender centenas de unidades.</li>
       </ul>
       <div class="fake-stat">
@@ -236,11 +252,11 @@
   <div class="wrap">
     <div class="sec-head">
       <span class="eyebrow">COMO FUNCIONA</span>
-      <h2>Três passos, nenhuma instalação.</h2>
+      <h2>Do lançamento à margem real, em três passos.</h2>
     </div>
     <div class="steps">
-      <div class="step"><span class="n">01</span><h3>Exporte o relatório</h3><p>Baixe o relatório de pedidos direto do painel de vendas que você já usa — em Excel, poucos minutos.</p></div>
-      <div class="step"><span class="n">02</span><h3>Cadastre os custos</h3><p>Uma vez só: digite manualmente ou importe uma planilha inteira de produtos de uma vez.</p></div>
+      <div class="step"><span class="n">01</span><h3>Precifique antes de anunciar</h3><p>Informe o custo do produto e a margem que você quer — a calculadora sugere o preço mínimo de venda.</p></div>
+      <div class="step"><span class="n">02</span><h3>Exporte o relatório</h3><p>Depois de vender, baixe o relatório de pedidos direto do painel de vendas que você já usa.</p></div>
       <div class="step"><span class="n">03</span><h3>Veja a margem real</h3><p>Solte o arquivo no painel. Vendas, taxas, custo e lucro — por produto e por pedido, na hora.</p></div>
     </div>
   </div>
@@ -250,15 +266,44 @@
   <div class="wrap">
     <div class="sec-head">
       <span class="eyebrow">O QUE VOCÊ RECEBE</span>
-      <h2>Um painel completo, não uma calculadora solta.</h2>
+      <h2>Duas ferramentas, um só painel.</h2>
+    </div>
+    <div class="duas">
+      <div class="duas-card">
+        <span class="tag">🧮 Antes de vender</span>
+        <h3>Calculadora de preço</h3>
+        <p>Informe o custo e a margem que você quer ganhar — a calculadora já desconta a comissão do marketplace e sugere o preço mínimo de venda.</p>
+        <ul>
+          <li><b>✓</b> Compara com produtos parecidos no marketplace</li>
+          <li><b>✓</b> Funciona pros principais marketplaces do Brasil</li>
+        </ul>
+      </div>
+      <div class="duas-card">
+        <span class="tag">📊 Depois de vender</span>
+        <h3>Painel de margem real</h3>
+        <p>Solte o relatório de pedidos e veja a renda real e a margem de cada produto, por SKU e por pedido.</p>
+        <div class="ticker-card">
+          <div class="ticker-head"><span class="t">VENDAS_POR_PEDIDO.LIVE</span></div>
+          <div class="ticker-viewport"><div class="ticker-track" id="track"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">TAMBÉM INCLUSO</span>
+      <h2>Um painel completo por trás das duas ferramentas.</h2>
     </div>
     <div class="feat-grid">
-      <div class="feat"><div class="ic" style="background:var(--mint-dim); color:var(--mint)">📊</div><h3>Painel de margem completo</h3><p>Vendas, taxas, custo, lucro e margem — por SKU e por pedido, com resumo por mês e por dia.</p></div>
-      <div class="feat"><div class="ic" style="background:rgba(255,122,26,.15); color:var(--laranja)">🏆</div><h3>Escada de margem por produto</h3><p>Veja em segundos quais produtos estão dando lucro e quais estão sangrando sua margem.</p></div>
-      <div class="feat"><div class="ic" style="background:rgba(255,212,0,.15); color:var(--amarelo)">🧩</div><h3>Suporte a combos</h3><p>Produtos vendidos junto (2 itens diferentes) calculam o custo certo automaticamente.</p></div>
-      <div class="feat"><div class="ic" style="background:var(--mint-dim); color:var(--mint)">📥</div><h3>Importação em massa</h3><p>Suba uma planilha inteira de custos de uma vez, ou deixe o painel puxar os SKUs dos pedidos.</p></div>
-      <div class="feat"><div class="ic" style="background:rgba(255,122,26,.15); color:var(--laranja)">📄</div><h3>Exporta Excel e PDF</h3><p>Leve os números pra reunião, pro contador, ou guarde de backup, com um clique.</p></div>
-      <div class="feat"><div class="ic" style="background:rgba(255,212,0,.15); color:var(--amarelo)">📖</div><h3>Guia completo incluso</h3><p>Explicação de cada tela e um FAQ com passo a passo — sem depender de suporte pra começar.</p></div>
+      <div class="feat"><div class="ic">🏆</div><h3>Escada de margem por produto</h3><p>Veja em segundos quais produtos estão dando lucro e quais estão sangrando sua margem.</p></div>
+      <div class="feat"><div class="ic">🧩</div><h3>Suporte a combos</h3><p>Produtos vendidos junto (2 itens diferentes) calculam o custo certo automaticamente.</p></div>
+      <div class="feat"><div class="ic">📥</div><h3>Importação em massa</h3><p>Suba uma planilha inteira de custos de uma vez, ou deixe o painel puxar os SKUs dos pedidos.</p></div>
+      <div class="feat"><div class="ic">📄</div><h3>Exporta Excel e PDF</h3><p>Leve os números pra reunião, pro contador, ou guarde de backup, com um clique.</p></div>
+      <div class="feat"><div class="ic">📖</div><h3>Guia completo incluso</h3><p>Explicação de cada tela e um FAQ com passo a passo — sem depender de suporte pra começar.</p></div>
+      <div class="feat"><div class="ic">🔁</div><h3>Atualizações incluídas</h3><p>Todo recurso novo que o painel receber no futuro já está incluso no seu acesso.</p></div>
     </div>
   </div>
 </section>
@@ -285,8 +330,8 @@
       <div class="now"><sup>R$</sup>43</div>
       <div class="sub">pagamento único · sem mensalidade</div>
       <ul class="price-list">
-        <li><b>✓</b> Acesso vitalício ao painel</li>
-        <li><b>✓</b> Todas as atualizações futuras incluídas</li>
+        <li><b>✓</b> Calculadora de preço + painel de margem</li>
+        <li><b>✓</b> Acesso vitalício, com atualizações futuras incluídas</li>
         <li><b>✓</b> Guia completo + FAQ</li>
         <li><b>✓</b> Funciona em qualquer computador</li>
       </ul>
@@ -308,6 +353,7 @@
     </div>
     <div class="faq-mini">
       <details open><summary>Preciso instalar alguma coisa?</summary><p>Não. O painel abre direto no navegador — funciona em qualquer computador, sem instalar nenhum programa.</p></details>
+      <details><summary>A calculadora de preço e o painel de margem são produtos separados?</summary><p>Não, os dois vêm juntos no mesmo acesso, por um único pagamento.</p></details>
       <details><summary>Meus dados de vendas ficam salvos em algum lugar?</summary><p>Não. Todo o cálculo é feito localmente, no seu navegador. Nada é enviado pra nenhum servidor.</p></details>
       <details><summary>Funciona pra qualquer marketplace?</summary><p>O painel reconhece automaticamente os formatos de relatório de pedidos dos principais marketplaces do Brasil.</p></details>
       <details><summary>E se eu não gostar?</summary><p>Você tem 7 dias de garantia — se não fizer sentido pra você, é só pedir reembolso.</p></details>
@@ -317,14 +363,14 @@
 
 <section class="cta-final" style="border-bottom:none">
   <div class="wrap">
-    <h2>Pare de vender no escuro.</h2>
-    <p>Descubra sua margem real hoje — pagamento único, R$43.</p>
+    <h2>Pare de precificar no escuro.</h2>
+    <p>Calcule o preço certo e acompanhe sua margem real — pagamento único, R$43.</p>
     <a class="btn" href="https://pay.kiwify.com.br/L17nmjF">Comprar agora</a>
   </div>
 </section>
 
 <footer>
-  <div class="wrap">Margem de Lucro · Ferramenta independente, compatível com os principais marketplaces do Brasil. Sem afiliação com nenhuma plataforma.</div>
+  <div class="wrap">Lucro Real · Ferramenta independente, compatível com os principais marketplaces do Brasil. Sem afiliação com nenhuma plataforma.</div>
 </footer>
 
 <script>
